@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"html"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -26,32 +25,35 @@ type RSSItem struct {
 }
 
 func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
+	feed := &RSSFeed{}
 	req, err := http.NewRequestWithContext(ctx, "GET", feedURL, nil)
 	if err != nil {
-		log.Fatalf("GATOR -- Error creating request\n%v", err)
+		return feed, err
 	}
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("GATOR -- Error elaborating request\n%v", err)
+		return feed, err
 	}
 	res.Header.Set("User-Agent", "gator")
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatalf("GATOR -- Error extracting response body\n%v", err)
+		return feed, err
 	}
-	feed := RSSFeed{}
 	err = xml.Unmarshal(body, &feed)
 	if err != nil {
-		log.Fatalf("GATOR -- Error parsing response\n%v", err)
+		return feed, err
 	}
+	feed.rssUnescape()
+	return feed, nil
 }
 
 func (f *RSSFeed) rssUnescape() {
 	f.Channel.Title = html.UnescapeString(f.Channel.Title)
 	f.Channel.Description = html.UnescapeString(f.Channel.Description)
-	for item := range f.Channel.Item {
-
+	for idx, item := range f.Channel.Item {
+		f.Channel.Item[idx].Title = html.UnescapeString(item.Title)
+		f.Channel.Item[idx].Description = html.UnescapeString(item.Description)
 	}
 }
