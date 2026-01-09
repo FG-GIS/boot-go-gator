@@ -1,36 +1,18 @@
 package main
 
 import (
-	"errors"
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/FG-GIS/boot-go-gator/internal/config"
+	"github.com/FG-GIS/boot-go-gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
-	configPointer *config.Config
-}
-
-type command struct {
-	name string
-	args []string
-}
-
-type commands struct {
-	commandList map[string]func(*state, command) error
-}
-
-func (c *commands) run(s *state, cmd command) error {
-	err := c.commandList[cmd.name](s, cmd)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *commands) register(name string, f func(*state, command) error) {
-	c.commandList[name] = f
+	db  *database.Queries
+	cfg *config.Config
 }
 
 func main() {
@@ -39,12 +21,17 @@ func main() {
 		log.Fatalf("Error reading the config file: %v", err)
 	}
 	s := state{
-		configPointer: &conf,
+		cfg: &conf,
 	}
 	c := commands{
 		commandList: make(map[string]func(*state, command) error),
 	}
 	c.register("login", handlerLogin)
+
+	db, err := sql.Open("postgres", conf.DBURL)
+
+	dbQueries := database.New(db)
+	s.db = dbQueries
 
 	if len(os.Args) < 2 {
 		log.Fatalf("Error, not enough arguments.")
@@ -57,19 +44,4 @@ func main() {
 	if err != nil {
 		log.Fatalf("GATOR Error: %v", err)
 	}
-}
-
-func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		return errors.New("Error, not enough arguments, Username is required for login.")
-	}
-	if len(cmd.args) > 1 {
-		return errors.New("Error, too many arguments.")
-	}
-	err := s.configPointer.SetUser(cmd.args[0])
-	if err != nil {
-		return err
-	}
-	log.Println("GATOR -- User correctly set.")
-	return nil
 }
