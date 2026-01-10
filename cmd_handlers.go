@@ -109,7 +109,7 @@ func handlerAgg(s *state, cmd command) error {
 
 func handlerFeed(s *state, cmd command) error {
 	if len(cmd.args) < 2 {
-		return errors.New("Error, not enough arguments, name and url required.")
+		return errors.New("GATOR -- Error, not enough arguments, name and url required.")
 	}
 	currentUsr, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
@@ -131,5 +131,21 @@ func handlerFeed(s *state, cmd command) error {
 	}
 	log.Println("GATOR -- Feed inserted successfully.")
 	log.Println(feed)
+	return nil
+}
+
+func handlerGetFeeds(s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		return errors.New("GATOR -- Error, too many arguments.")
+	}
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		log.Println("GATOR -- Error, retrieving feed entries.")
+		return err
+	}
+	if len(feeds) == 0 {
+		return errors.New("GATOR -- Error, no feeds to retrieve.")
+	}
+	log.Println(feeds)
 	return nil
 }
