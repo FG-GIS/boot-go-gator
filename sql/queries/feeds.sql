@@ -17,5 +17,5 @@ INSERT INTO feeds (
 RETURNING *;
 
 -- name: GetFeeds :many
-SELECT feeds.id,feeds.name,feeds.url,users.name FROM feeds
-LEFT JOIN users ON feeds.user_id = users.id;
+SELECT feeds.id,feeds.name,feeds.url,users.name AS user FROM feeds
+INNER JOIN users ON feeds.user_id = users.id;

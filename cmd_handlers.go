@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/FG-GIS/boot-go-gator/internal/database"
@@ -12,19 +12,19 @@ import (
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
-		return errors.New("Error, not enough arguments, Username is required for login.")
+		return errors.New("GATOR -- Error, not enough arguments, Username is required for login.")
 	}
 	if len(cmd.args) > 1 {
-		return errors.New("Error, too many arguments.")
+		return errors.New("GATOR -- Error, too many arguments.")
 	}
 	if _, err := s.db.GetUser(context.Background(), cmd.args[0]); err != nil {
-		log.Fatalf("Error, non-existant username.\n %v", err)
+		return fmt.Errorf("GATOR -- Error, non-existant username.\n %v", err)
 	}
 	err := s.cfg.SetUser(cmd.args[0])
 	if err != nil {
 		return err
 	}
-	log.Println("GATOR -- User correctly set.")
+	fmt.Println("GATOR -- User correctly set.")
 	return nil
 }
 
@@ -39,7 +39,7 @@ func handlerRegister(s *state, cmd command) error {
 		return errors.New("User already registered, exiting.")
 	}
 	usr, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
-		ID:        int32(uuid.New()[0]),
+		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      cmd.args[0],
@@ -51,8 +51,8 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
-	log.Println("GATOR -- User correctly registered.")
-	log.Printf("User generated: %v", usr)
+	fmt.Println("GATOR -- User correctly registered.")
+	fmt.Printf("User generated: %v", usr)
 	return nil
 }
 
@@ -62,10 +62,10 @@ func handlerReset(s *state, cmd command) error {
 	}
 	err := s.db.Reset(context.Background())
 	if err != nil {
-		log.Println("Error re-setting table")
+		fmt.Println("Error re-setting table")
 		return err
 	}
-	log.Println("GATOR -- Table cleansed")
+	fmt.Println("GATOR -- Table cleansed")
 	return nil
 }
 
@@ -75,14 +75,14 @@ func handlerGetUsers(s *state, cmd command) error {
 	}
 	usrSlice, err := s.db.GetUsers(context.Background())
 	if err != nil {
-		log.Println("Error gathering users from table")
+		fmt.Println("Error gathering users from table")
 		return err
 	}
 	for _, usr := range usrSlice {
 		if usr == s.cfg.CurrentUserName {
-			log.Printf("* %v (current)\n", usr)
+			fmt.Printf("* %v (current)\n", usr)
 		} else {
-			log.Printf("* %v\n", usr)
+			fmt.Printf("* %v\n", usr)
 		}
 	}
 	return nil
@@ -100,10 +100,10 @@ func handlerAgg(s *state, cmd command) error {
 	}
 	feed, err := fetchFeed(context.Background(), cmd.args[0])
 	if err != nil {
-		log.Println("GATOR -- Error fetching feed.")
+		fmt.Println("GATOR -- Error fetching feed.")
 		return err
 	}
-	log.Println("GATOR -- fetched feed ==> ", feed)
+	fmt.Println("GATOR -- fetched feed ==> ", feed)
 	return nil
 }
 
@@ -113,11 +113,11 @@ func handlerFeed(s *state, cmd command) error {
 	}
 	currentUsr, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
 	if err != nil {
-		log.Println("GATOR -- Error getting current user.")
+		fmt.Println("GATOR -- Error getting current user.")
 		return err
 	}
 	feedEntry := database.CreateFeedParams{
-		ID:        int32(uuid.New()[0]),
+		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      cmd.args[0],
@@ -126,11 +126,11 @@ func handlerFeed(s *state, cmd command) error {
 	}
 	feed, err := s.db.CreateFeed(context.Background(), feedEntry)
 	if err != nil {
-		log.Println("GATOR -- Error inserting feed entry.")
+		fmt.Println("GATOR -- Error inserting feed entry.")
 		return err
 	}
-	log.Println("GATOR -- Feed inserted successfully.")
-	log.Println(feed)
+	fmt.Println("GATOR -- Feed inserted successfully.")
+	fmt.Println(feed)
 	return nil
 }
 
@@ -140,12 +140,13 @@ func handlerGetFeeds(s *state, cmd command) error {
 	}
 	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
-		log.Println("GATOR -- Error, retrieving feed entries.")
+		fmt.Println("GATOR -- Error, retrieving feed entries.")
 		return err
 	}
 	if len(feeds) == 0 {
-		return errors.New("GATOR -- Error, no feeds to retrieve.")
+		fmt.Println("GATOR -- Error, no feeds to retrieve.")
+		return nil
 	}
-	log.Println(feeds)
+	printFeeds(feeds)
 	return nil
 }

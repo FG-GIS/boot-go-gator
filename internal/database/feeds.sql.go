@@ -7,8 +7,9 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const createFeed = `-- name: CreateFeed :one
@@ -31,12 +32,12 @@ RETURNING id, created_at, updated_at, name, url, user_id
 `
 
 type CreateFeedParams struct {
-	ID        int32
+	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Name      string
 	Url       string
-	UserID    int32
+	UserID    uuid.UUID
 }
 
 func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, error) {
@@ -61,15 +62,15 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 }
 
 const getFeeds = `-- name: GetFeeds :many
-SELECT feeds.id,feeds.name,feeds.url,users.name FROM feeds
-LEFT JOIN users ON feeds.user_id = users.id
+SELECT feeds.id,feeds.name,feeds.url,users.name AS user FROM feeds
+INNER JOIN users ON feeds.user_id = users.id
 `
 
 type GetFeedsRow struct {
-	ID     int32
-	Name   string
-	Url    string
-	Name_2 sql.NullString
+	ID   uuid.UUID
+	Name string
+	Url  string
+	User string
 }
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
@@ -85,7 +86,7 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 			&i.ID,
 			&i.Name,
 			&i.Url,
-			&i.Name_2,
+			&i.User,
 		); err != nil {
 			return nil, err
 		}
