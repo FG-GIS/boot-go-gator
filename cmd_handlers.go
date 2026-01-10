@@ -106,3 +106,30 @@ func handlerAgg(s *state, cmd command) error {
 	log.Println("GATOR -- fetched feed ==> ", feed)
 	return nil
 }
+
+func handlerFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		return errors.New("Error, not enough arguments, name and url required.")
+	}
+	currentUsr, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		log.Println("GATOR -- Error getting current user.")
+		return err
+	}
+	feedEntry := database.CreateFeedParams{
+		ID:        int32(uuid.New()[0]),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.args[0],
+		Url:       cmd.args[1],
+		UserID:    currentUsr.ID,
+	}
+	feed, err := s.db.CreateFeed(context.Background(), feedEntry)
+	if err != nil {
+		log.Println("GATOR -- Error inserting feed entry.")
+		return err
+	}
+	log.Println("GATOR -- Feed inserted successfully.")
+	log.Println(feed)
+	return nil
+}

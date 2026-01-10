@@ -31,6 +31,7 @@ func main() {
 	c.register("reset", handlerReset)
 	c.register("users", handlerGetUsers)
 	c.register("agg", handlerAgg)
+	c.register("addfeed", handlerFeed)
 
 	db, err := sql.Open("postgres", conf.DBURL)
 

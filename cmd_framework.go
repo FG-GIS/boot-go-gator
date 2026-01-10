@@ -1,5 +1,9 @@
 package main
 
+import (
+	"errors"
+)
+
 type command struct {
 	name string
 	args []string
@@ -10,7 +14,11 @@ type commands struct {
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	err := c.commandList[cmd.name](s, cmd)
+	f, ok := c.commandList[cmd.name]
+	if !ok {
+		return errors.New("GATOR -- Error, command not mapped.")
+	}
+	err := f(s, cmd)
 	if err != nil {
 		return err
 	}
