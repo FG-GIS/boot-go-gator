@@ -15,3 +15,10 @@ func printFeeds(feedSlice []database.GetFeedsRow) {
 		fmt.Printf("* User:							%s\n", f.User)
 	}
 }
+
+func printFollowing(followSlice []database.GetFeedFollowsForUserRow, user string) {
+	fmt.Printf("GATOR -- User ==> %s - is following:\n", user)
+	for _, follow := range followSlice {
+		fmt.Printf("* %s\n", follow.FeedName)
+	}
+}

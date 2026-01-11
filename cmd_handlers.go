@@ -129,6 +129,12 @@ func handlerFeed(s *state, cmd command) error {
 		fmt.Println("GATOR -- Error inserting feed entry.")
 		return err
 	}
+	cmd.args = cmd.args[1:]
+	err = handlerSetFollow(s, cmd)
+	if err != nil {
+		fmt.Println("GATOR -- Error setting follow.")
+		return err
+	}
 	fmt.Println("GATOR -- Feed inserted successfully.")
 	fmt.Println(feed)
 	return nil
@@ -148,5 +154,60 @@ func handlerGetFeeds(s *state, cmd command) error {
 		return nil
 	}
 	printFeeds(feeds)
+	return nil
+}
+
+func handlerSetFollow(s *state, cmd command) error {
+	if len(cmd.args) == 0 {
+		return errors.New("GATOR -- Error, not enough arguments, URL required.")
+	}
+	if len(cmd.args) > 1 {
+		return errors.New("GATOR -- Error, too many arguments.")
+	}
+	currentUsr, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		fmt.Println("GATOR -- Error getting current user.")
+		return err
+	}
+
+	feed, err := s.db.GetFeedByURL(context.Background(), cmd.args[0])
+	if err != nil {
+		fmt.Println("GATOR -- Error, feed not found.")
+		return err
+	}
+
+	followEntry := database.CreateFeedFollowsParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    currentUsr.ID,
+		FeedsID:   feed.ID,
+	}
+	follows, err := s.db.CreateFeedFollows(context.Background(), followEntry)
+	if err != nil {
+		fmt.Println("GATOR -- Error inserting follow entry")
+		return err
+	}
+	fmt.Println("GATOR -- Follow added succesfully:")
+	fmt.Printf("* Name: %s\n", follows.FeedName)
+	fmt.Printf("* User: %s\n", follows.UserName)
+	return nil
+}
+
+func handlerShowFollowingUser(s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		return errors.New("GATOR -- Error, too many arguments")
+	}
+	currentUsr, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		fmt.Println("GATOR -- Error getting current user.")
+		return err
+	}
+	follows, err := s.db.GetFeedFollowsForUser(context.Background(), currentUsr.ID)
+	if err != nil {
+		fmt.Println("GATOR -- Error, can't retrieve follows for user.")
+		return err
+	}
+	printFollowing(follows, currentUsr.Name)
 	return nil
 }
