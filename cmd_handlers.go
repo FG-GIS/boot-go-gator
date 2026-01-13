@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/FG-GIS/boot-go-gator/internal/database"
 	"github.com/google/uuid"
+	"strconv"
+	"time"
 )
 
 func handlerLogin(s *state, cmd command) error {
@@ -218,5 +218,27 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 	fmt.Printf("GATOR -- User => %s - unfollowed => %s\n", user.Name, feed.Name)
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	if len(cmd.args) == 0 {
+		cmd.args = append(cmd.args, "2")
+	}
+	if len(cmd.args) > 1 {
+		return errors.New("GATOR, Error too many arguments.")
+	}
+	limit, err := strconv.Atoi(cmd.args[0])
+	if err != nil {
+		fmt.Println("GATOR -- Error parsing limit string.")
+		return err
+	}
+	posts, err := s.db.GetPostsByUser(context.Background(), database.GetPostsByUserParams{
+		UserID: user.ID,
+		Limit:  int32(limit),
+	})
+	for _, p := range posts {
+		printPost(p)
+	}
 	return nil
 }

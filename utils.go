@@ -9,6 +9,8 @@ import (
 
 	"github.com/FG-GIS/boot-go-gator/internal/config"
 	"github.com/FG-GIS/boot-go-gator/internal/database"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 func getState() state {
@@ -81,6 +83,42 @@ func scrapeFeeds(s *state) error {
 		fmt.Println("GATOR -- Error fetching feed.")
 		return err
 	}
-	rss.printTitles()
+	for _, item := range rss.Channel.Item {
+		pubTime, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			fmt.Println("GATOR -- Error parsing publish time.")
+			fmt.Println(item.PubDate)
+			return err
+		}
+		post, err := s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title:     item.Title,
+			Url:       item.Link,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			PublishedAt: pubTime,
+			FeedID:      feed.ID,
+		})
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code != "23505" {
+				fmt.Printf("GATOR -- Error saving post:\n -- %v\n", err)
+			} else {
+				continue
+			}
+		}
+		fmt.Printf("GATOR -- Post added => %v\n", post.Title)
+	}
 	return nil
+}
+
+func printPost(post database.Post) {
+	fmt.Println("------------------------------------------")
+	fmt.Printf("* %s\n", post.Title)
+	fmt.Printf("* %s\n", post.PublishedAt.Format(time.DateTime))
+	fmt.Printf("***\n %s\n***\n", post.Description.String)
+	fmt.Println("------------------------------------------")
 }
