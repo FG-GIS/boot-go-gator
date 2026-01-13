@@ -54,15 +54,15 @@ it should contain:
 
 ## Commands
 to run the program run `boot-go-gator` followed by:
-- register <user>
+- register *user*  
   *adds a user to the database*
-- login <user>
+- login *user*  
   *change actual database user*
-- addfeed <link>
+- addfeed *link*  
   *adds a new feed to the database*
-- feeds
+- feeds  
   *prints the feeds for this user to the console*
-- agg
+- agg  
   *runs the main loop to gather posts from the feeds*
-- browse <number>
-  *prints to screen <number> most recent posts*
+- browse *number*  
+  *prints to screen *number* most recent posts*
