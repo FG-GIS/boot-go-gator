@@ -24,19 +24,11 @@ go version
 
 The Database technology of choice is Postgres:
 
-**Linux**
-___
 ```
 sudo apt install postgresql-17
 ```
 
 Or use your package manager depending on your distro.
-
-**Windows**
-___  
-From the official download link [Postgres](https://www.postgresql.org/download/windows/)
-
-___
 
 ### Package
 
