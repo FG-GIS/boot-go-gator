@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/FG-GIS/boot-go-gator/internal/config"
-	"github.com/FG-GIS/boot-go-gator/internal/database"
+	"github.com/FG-GIS/feedGator/internal/config"
+	"github.com/FG-GIS/feedGator/internal/database"
 	_ "github.com/lib/pq"
 )
 

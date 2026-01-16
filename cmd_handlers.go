@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/FG-GIS/boot-go-gator/internal/database"
+	"github.com/FG-GIS/feedGator/internal/database"
 	"github.com/google/uuid"
 	"strconv"
 	"time"

@@ -3,13 +3,13 @@
 Creating an RSS aggregator with internal database, as a lesson for both go develpment and SQL/DB usage.
 
 ### Roadmap
-___
 
 1. Renaming package;
 2. Assigning verbose output to -v option for each command;
+3. Update agg to a background running process, concurrent.
 
-**Prerequisites**
-___
+#### Prerequisites
+
 The repository is written in Go, to install it, download the go package for your platform
 from the official site:
 
@@ -50,7 +50,7 @@ it should contain:
 }
 ```
 
-## Commands
+### Commands
 to run the program run `boot-go-gator` followed by:
 - register *user*  
   *adds a user to the database*

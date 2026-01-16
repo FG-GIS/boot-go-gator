@@ -1,4 +1,4 @@
-module github.com/FG-GIS/boot-go-gator
+module github.com/FG-GIS/feedGator
 
 go 1.25.5
 

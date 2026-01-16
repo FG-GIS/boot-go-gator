@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/FG-GIS/boot-go-gator/internal/config"
-	"github.com/FG-GIS/boot-go-gator/internal/database"
+	"github.com/FG-GIS/feedGator/internal/config"
+	"github.com/FG-GIS/feedGator/internal/database"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
