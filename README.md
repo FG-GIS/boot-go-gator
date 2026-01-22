@@ -4,6 +4,10 @@ Creating an RSS aggregator with internal database, as a lesson for both go devel
 
 ### Roadmap
 
+Updated cmd validation structure:
+  - complete handlers validation
+  - complete logging and verbose logic
+
 1. Assigning verbose output to -v option for each command;
   - handlerAgg verbose added;
 2. Update agg to a background running process, concurrent.

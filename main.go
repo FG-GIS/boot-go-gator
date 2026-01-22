@@ -11,8 +11,10 @@ import (
 )
 
 type state struct {
-	db  *database.Queries
-	cfg *config.Config
+	db      *database.Queries
+	cfg     *config.Config
+	verbose bool
+	log     logging
 }
 
 func main() {
@@ -38,11 +40,15 @@ func main() {
 	s.db = dbQueries
 
 	if len(os.Args) < 2 {
-		log.Fatalf("Error, not enough arguments.")
+		log.Fatalf("GATOR -- Error, not enough arguments.")
 	}
 	cmd := command{
 		name: os.Args[1],
 		args: os.Args[2:],
+	}
+	s.verbose, s.log, err = cmd.validate()
+	if err != nil {
+		log.Fatalf("GATOR Error: %v", err)
 	}
 	err = c.run(&s, cmd)
 	if err != nil {

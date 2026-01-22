@@ -13,12 +13,6 @@ import (
 )
 
 func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		return errors.New("GATOR -- Error, not enough arguments, Username is required for login.")
-	}
-	if len(cmd.args) > 1 {
-		return errors.New("GATOR -- Error, too many arguments.")
-	}
 	if _, err := s.db.GetUser(context.Background(), cmd.args[0]); err != nil {
 		return fmt.Errorf("GATOR -- Error, non-existant username.\n %v", err)
 	}
